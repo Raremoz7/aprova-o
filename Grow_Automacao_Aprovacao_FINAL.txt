@@ -1,0 +1,139 @@
+
+📘 Documento Técnico — Projeto de Automação de Aprovação de Vídeos
+Grow Business | Google Apps Script + Telegram + Frame.io
+
+🎯 OBJETIVO DO PROJETO
+Automatizar e organizar o processo de aprovação de vídeos da agência Grow Business, utilizando ferramentas gratuitas e flexíveis como:
+- Google Drive
+- Google Sheets
+- Google Apps Script
+- Telegram Bot
+- OpenAI API
+- Frame.io
+
+O objetivo é centralizar a coleta, aprovação e histórico das peças audiovisuais com:
+- Integração com ferramentas já utilizadas
+- Interpretação dinâmica por IA
+
+✅ FLUXO PRINCIPAL
+
+1. Upload de vídeo no Frame.io
+- O vídeo é enviado para uma pasta com estrutura replicada do Drive (01. CLIENTES/...).
+- Um webhook dispara o fluxo no Apps Script.
+
+2. Interpretação com IA (OpenAI)
+- Nome e caminho do arquivo são enviados para o modelo.
+- A IA retorna:
+  - Cliente
+  - Editor
+  - Tipo (Orgânico/Tráfego)
+  - Tipo de fluxo (Aprovação / Alteração)
+  - Texto da mensagem para o Telegram
+
+3. Registro na planilha de controle
+- Planilha: Controle Aprovação
+- Link: https://docs.google.com/spreadsheets/d/1jL2CiWH466QADpWU2iA6SpC5iGuy957GA90f5I1GpGw/edit?usp=sharing
+- Campos registrados:
+  - ID da tarefa
+  - Nome do vídeo
+  - Cliente
+  - Editor
+  - Caminho
+  - Etapa atual
+  - Status
+  - Links (Drive + Frame.io)
+  - ID da mensagem Telegram
+  - Última modificação
+
+4. Envio para Telegram
+- Usa UrlFetchApp para enviar mensagens com botões inline
+- Threads:
+  - 2 → Equipe interna
+  - 27 → Cliente
+
+5. Respostas no Telegram
+- Webhook captura respostas dos botões
+- Atualiza a planilha com o novo status
+- Edita ou deleta mensagens anteriores para evitar flood
+
+6. Verificação de Status no Frame.io
+- Script checa periodicamente o status do vídeo no Frame.io
+- Se aprovado:
+  - Atualiza a etapa
+  - Envia ao cliente
+  - Copia o vídeo para o Drive
+
+7. Cópia automática para o Google Drive
+- O vídeo é copiado respeitando a estrutura original (01. CLIENTES/...)
+
+🗂️ ESTRUTURA DE ARQUIVOS .gs
+- main.gs → fluxo principal
+- telegram.gs → envio e resposta no Telegram
+- ai.gs → integração com OpenAI
+- frameio.gs → conexão com Frame.io
+- sheet.gs → manipulação da planilha
+- webhook.gs → recepção de cliques
+- config.gs → tokens e parâmetros globais
+
+📋 PADRÃO DE NOMES DOS VÍDEOS
+- Prefixo recomendado: GROWAPR_
+- Formato: GROWAPR_NomeCriativo_vX.mp4
+- Exemplo: GROWAPR_Criativo1_v2.mp4
+
+🔁 ETAPAS DO FLUXO
+| Etapa               | Descrição                        |
+|---------------------|----------------------------------|
+| Aguardando Upload   | Criada manualmente via chat      |
+| Aprovação Interna   | Aguardando votos da equipe       |
+| Ajustes Internos    | Retorno ao editor após votação   |
+| Cliente: Aguardando | Aprovado internamente            |
+| Cliente: Aprovado   | Confirmado pelo cliente          |
+| Finalizado          | Encerrado                        |
+
+🧠 INTEGRAÇÃO COM IA
+- Extrai cliente, editor, tipo e fluxo
+- Gera mensagem do Telegram automaticamente
+- Logs de IA: gravar prompts e respostas em aba “Log IA”
+
+🧪 LÓGICA DE PESQUISA (Google Drive)
+- Evitar `name contains` → pode confundir com "abril", "apresentação"
+- Evitar confiar apenas em `modifiedDate` (câmera com erro)
+- Usar `createdDate` com intervalo entre hoje e +7 dias
+- Ignorar arquivos com datas futuras inválidas
+- Usar filtros:
+  - `mimeType = video`
+  - Caminho deve conter `/01. CLIENTES/`
+
+📲 BOT TELEGRAM
+- Nome: @growbusinessbsb_bot
+- Token: 7857235070:AAG4s0RU02_uiG2kbl_jMsQE_TLqUXYrgqY
+- Chat ID: -1002612569510
+- Threads:
+  - 2 → Aprovação Interna
+  - 27 → Cliente
+- Permissões:
+  - Admin
+  - Privacidade desativada
+  - Acesso a mensagens e botões inline
+
+📂 TÓPICOS DO TELEGRAM
+| Tópico                 | Thread ID | Link                                      |
+|------------------------|-----------|-------------------------------------------|
+| INSTRUÇÕES             | 19        | https://t.me/c/2612569510/19              |
+| GERAL & AVISOS         | 1         | https://t.me/c/2612569510/1               |
+| AGENDA                 | 229       | https://t.me/c/2612569510/229             |
+| APROVAÇÃO INTERNA      | 2         | https://t.me/c/2612569510/2               |
+| APROVAÇÃO CLIENTES     | 27        | https://t.me/c/2612569510/27              |
+| DRIVE                  | 113       | https://t.me/c/2612569510/113             |
+| REFERÊNCIAS & IDEIAS   | 735       | https://t.me/c/2612569510/735             |
+| CAPTAÇÃO - LINKS       | 4         | https://t.me/c/2612569510/4               |
+| BRIEFINGS              | 5         | https://t.me/c/2612569510/5               |
+
+📦 INTEGRAÇÃO FUTURA COM ClickUp (Opcional)
+- Substituir ou espelhar a planilha
+- Receber tarefas por API
+- Atualizações de status e etapas
+- Sincronizar com Telegram e IA via webhook
+
+✅ PRONTO PARA EXECUÇÃO
+Documentação pronta para desenvolvedor, IA (Copilot/ChatGPT) ou outro assistente técnico implementar os módulos Google Apps Script.
